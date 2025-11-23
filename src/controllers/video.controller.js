@@ -17,22 +17,22 @@ const uploadVideo = asyncHandler(async (req, res) => {
   }
 
   // Get the files
-  const videoFileLocalPath = req.files?.videoFile?.[0]?.path;
-  const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path;
-  if (!videoFileLocalPath || !thumbnailLocalPath) {
+  const videoFileObj = req.files?.videoFile?.[0];
+  const thumbnailObj = req.files?.thumbnail?.[0];
+  if (!videoFileObj || !thumbnailObj) {
     throw new ApiError(400, "Video file and thumbnail are required!");
   }
 
   // Check file size (5MB = 5 * 1024 * 1024 bytes)
-  const videoFileSize = req.files?.videoFile?.[0]?.size;
+  const videoFileSize = videoFileObj.size;
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (videoFileSize > maxSize) {
     throw new ApiError(400, "Video size must be less than 5MB!");
   }
 
-  // Upload on Cloudi
-  const videoFile = await uploadCloudinary(videoFileLocalPath);
-  const thumbnail = await uploadCloudinary(thumbnailLocalPath);
+  // Upload on Cloudinary (works with both path and buffer)
+  const videoFile = await uploadCloudinary(videoFileObj.path || videoFileObj);
+  const thumbnail = await uploadCloudinary(thumbnailObj.path || thumbnailObj);
 
   // Get URL and duration
   const videoUrl = videoFile.url;
@@ -211,13 +211,13 @@ const updateContent = asyncHandler(async (req, res) => {
   }
 
   // Get multer Data
-  const thumbnailLocalPath = req.file?.path;
-  if (!thumbnailLocalPath) {
+  const thumbnailFile = req.file;
+  if (!thumbnailFile) {
     throw new ApiError(400, "thumbnail is required!");
   }
 
-  // Upload on Cloudi
-  const thumbnail = await uploadCloudinary(thumbnailLocalPath);
+  // Upload on Cloudinary
+  const thumbnail = await uploadCloudinary(thumbnailFile.path || thumbnailFile);
   if (!thumbnail) {
     throw new ApiError(400, "Error uploading thumbnail to Cloudinary!");
   }
@@ -260,20 +260,20 @@ const updateVideo = asyncHandler(async (req, res) => {
   }
 
   // Get Video Data
-  const videoFileLocalPath = req.file?.path;
-  if (!videoFileLocalPath) {
+  const videoFileObj = req.file;
+  if (!videoFileObj) {
     throw new ApiError(400, "Video file is missing!");
   }
 
   // Check for Size
-  const videoSize = req.file?.size;
+  const videoSize = videoFileObj.size;
   const maxSize = 5 * 1024 * 1024;
   if (videoSize > maxSize) {
     throw new ApiError(400, "Video Size must be less than 5MB!");
   }
 
-  // Upload on Cloudi
-  const videoFile = await uploadCloudinary(videoFileLocalPath);
+  // Upload on Cloudinary
+  const videoFile = await uploadCloudinary(videoFileObj.path || videoFileObj);
   if (!videoFile) {
     throw new ApiError(400, "Error uploading Video!");
   }
