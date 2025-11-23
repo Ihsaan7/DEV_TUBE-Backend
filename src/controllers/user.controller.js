@@ -20,15 +20,16 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   //File upload
-  const avatarLocalPath = req.files?.avatar?.[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+  const avatarFile = req.files?.avatar?.[0];
+  const coverImageFile = req.files?.coverImage?.[0];
 
-  if (!avatarLocalPath) {
+  if (!avatarFile) {
     throw new ApiError(400, "Avatar is required!");
   }
 
-  const avatar = await uploadCloudinary(avatarLocalPath);
-  const coverImage = await uploadCloudinary(coverImageLocalPath);
+  // Pass file object (works with both path and buffer)
+  const avatar = await uploadCloudinary(avatarFile.path || avatarFile);
+  const coverImage = await uploadCloudinary(coverImageFile?.path || coverImageFile);
 
   if (!avatar) {
     throw new ApiError(400, "Avatar file is required!");

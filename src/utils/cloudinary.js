@@ -1,9 +1,9 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
-const uploadCloudinary = async (localFilePath) => {
+const uploadCloudinary = async (file) => {
   try {
-    if (!localFilePath) return null;
+    if (!file) return null;
 
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,19 +11,41 @@ const uploadCloudinary = async (localFilePath) => {
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
 
-    const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: "auto",
-    });
+    // Handle both file path (local) and buffer (Vercel)
+    let response;
+    if (typeof file === 'string') {
+      // File path - local development
+      response = await cloudinary.uploader.upload(file, {
+        resource_type: "auto",
+      });
+      fs.unlinkSync(file); // Clean up local file
+    } else if (file.buffer) {
+      // Buffer from multer memory storage - Vercel
+      response = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { resource_type: "auto" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(file.buffer);
+      });
+    } else {
+      throw new Error("Invalid file format");
+    }
+
     console.log(
       "File uploading to Cloudinary Successfull. URL: ",
       response.url
     );
 
-    fs.unlinkSync(localFilePath);
     return response;
   } catch (err) {
     console.log("Uploading on Cloudinary Error!", err);
-    fs.unlinkSync(localFilePath);
+    // Try to clean up file if it exists
+    if (typeof file === 'string' && fs.existsSync(file)) {
+      fs.unlinkSync(file);
+    }
     return null;
   }
 };
