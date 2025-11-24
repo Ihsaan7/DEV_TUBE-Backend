@@ -1,8 +1,8 @@
-import app from "../src/app.js";
 import connectDB from "../src/db/db.js";
 
 // Connect to DB once
 let isConnected = false;
+let app;
 
 const connectToDatabase = async () => {
   if (isConnected) {
@@ -19,6 +19,11 @@ const connectToDatabase = async () => {
 // Serverless handler
 export default async (req, res) => {
   try {
+    // Lazy load app to catch import errors
+    if (!app) {
+      app = (await import("../src/app.js")).default;
+    }
+    
     // Connect to database
     await connectToDatabase();
     
@@ -29,6 +34,7 @@ export default async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal server error",
+      error: err.message,
     });
   }
 };
