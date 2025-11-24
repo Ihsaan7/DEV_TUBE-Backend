@@ -1,4 +1,4 @@
-import Router from "express";
+import { Router } from "express";
 import verifyJWT from "../middlewares/auth.mware.js";
 import { generateUploadSignature } from "../controllers/cloudinary.controller.js";
 

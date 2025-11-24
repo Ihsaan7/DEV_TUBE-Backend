@@ -1,8 +1,8 @@
 import connectDB from "../src/db/db.js";
+import app from "../src/app.js";
 
 // Connect to DB once
 let isConnected = false;
-let app;
 
 const connectToDatabase = async () => {
   if (isConnected) {
@@ -13,28 +13,23 @@ const connectToDatabase = async () => {
     isConnected = true;
   } catch (err) {
     console.error("MongoDB connection error:", err);
+    throw err;
   }
 };
 
-// Serverless handler
-export default async (req, res) => {
+// Middleware to ensure DB connection
+app.use(async (req, res, next) => {
   try {
-    // Lazy load app to catch import errors
-    if (!app) {
-      app = (await import("../src/app.js")).default;
-    }
-    
-    // Connect to database
     await connectToDatabase();
-    
-    // Let Express handle the request (CORS is already configured in app.js)
-    return app(req, res);
+    next();
   } catch (err) {
-    console.error("Serverless function error:", err);
+    console.error("Database connection failed:", err);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Database connection failed",
       error: err.message,
     });
   }
-};
+});
+
+export default app;
