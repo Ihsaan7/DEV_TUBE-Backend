@@ -127,6 +127,14 @@ const getVideo = asyncHandler(async (req, res) => {
     }
   }
 
+  // Attach like status and count to the response
+  const likesCount = await Like.countDocuments({ video: videoID });
+  const isLiked = req.user
+    ? !!(await Like.findOne({ video: videoID, likedBy: req.user._id }))
+    : false;
+  videoData.likesCount = likesCount;
+  videoData.isLiked = isLiked;
+
   // NOTE: View count is now incremented via separate incrementView endpoint
   // This prevents views from incrementing on every page load
 

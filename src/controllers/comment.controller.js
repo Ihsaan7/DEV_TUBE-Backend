@@ -128,6 +128,18 @@ const getAllComment = asyncHandler(async (req, res) => {
     {
       $addFields: { owner: { $first: "$owner" } },
     },
+    // Add likesCount via lookup
+    {
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "comment",
+        as: "likes",
+      },
+    },
+    {
+      $addFields: { likesCount: { $size: "$likes" } },
+    },
     {
       $sort: { createdAt: -1 },
     },
@@ -137,6 +149,7 @@ const getAllComment = asyncHandler(async (req, res) => {
         createdAt: 1,
         updatedAt: 1,
         owner: 1,
+        likesCount: 1,
       },
     },
   ];
