@@ -10,41 +10,27 @@ import mongoose from "mongoose";
 import User from "../models/user.model.js";
 
 const uploadVideo = asyncHandler(async (req, res) => {
-  // Get data
-  const { title, description, isPublished } = req.body;
+  // Get data - now accepting URLs from direct Cloudinary upload
+  const { title, description, isPublished, videoUrl, thumbnailUrl, duration } = req.body;
+  
   if (!(title && description)) {
-    throw new ApiError(400, "Both fields are required!");
+    throw new ApiError(400, "Title and description are required!");
   }
 
-  // Get the files
-  const videoFileObj = req.files?.videoFile?.[0];
-  const thumbnailObj = req.files?.thumbnail?.[0];
-  if (!videoFileObj || !thumbnailObj) {
-    throw new ApiError(400, "Video file and thumbnail are required!");
+  if (!videoUrl || !thumbnailUrl) {
+    throw new ApiError(400, "Video URL and thumbnail URL are required!");
   }
 
-  // Check file size (5MB = 5 * 1024 * 1024 bytes)
-  const videoFileSize = videoFileObj.size;
-  const maxSize = 5 * 1024 * 1024; // 5MB
-  if (videoFileSize > maxSize) {
-    throw new ApiError(400, "Video size must be less than 5MB!");
+  if (!duration || duration <= 0) {
+    throw new ApiError(400, "Valid video duration is required!");
   }
 
-  // Upload on Cloudinary (works with both path and buffer)
-  const videoFile = await uploadCloudinary(videoFileObj.path || videoFileObj);
-  const thumbnail = await uploadCloudinary(thumbnailObj.path || thumbnailObj);
-
-  // Get URL and duration
-  const videoUrl = videoFile.url;
-  const videoDuration = videoFile.duration;
-  const thumbnailUrl = thumbnail.url;
-
-  // Create video in DB
+  // Create video in DB with URLs from frontend upload
   const video = await Video.create({
     title,
     description,
     videoFile: videoUrl,
-    duration: videoDuration,
+    duration: duration,
     thumbnail: thumbnailUrl,
     owner: req.user._id,
     isPublished: isPublished === "true" || isPublished === true,
