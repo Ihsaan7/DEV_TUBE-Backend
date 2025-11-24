@@ -13,7 +13,30 @@ const app = express();
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ limit: "16kb", extended: true }));
-app.use(cors({ origin: process.env.CORS_ORIGIN || true, credentials: true }));
+
+// Robust CORS with explicit allowed origins and headers
+const allowedOrigins = [
+  process.env.CORS_ORIGIN,
+  "http://localhost:5173",
+  "https://dev-tube-frontend.vercel.app",
+].filter(Boolean);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow same-origin or non-browser requests
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+// Ensure preflight requests are handled
+app.options("*", cors(corsOptions));
+
 app.use(cookieParser());
 
 // User Route

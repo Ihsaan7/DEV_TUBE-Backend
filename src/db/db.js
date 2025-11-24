@@ -8,7 +8,9 @@ const connectDB = async () => {
     );
   } catch (err) {
     console.log("Connection Error to MONGODB!!!", err);
-    process.exit(1);
+    // Do not terminate the process in serverless environments.
+    // Throw the error so the caller can handle it and still respond with CORS headers.
+    throw err;
   }
 };
 
