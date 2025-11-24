@@ -23,11 +23,11 @@ const uploadVideo = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Video file and thumbnail are required!");
   }
 
-  // Check file size (5MB = 5 * 1024 * 1024 bytes)
+  // Check file size (50MB = 50 * 1024 * 1024 bytes)
   const videoFileSize = videoFileObj.size;
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 50 * 1024 * 1024; // 50MB
   if (videoFileSize > maxSize) {
-    throw new ApiError(400, "Video size must be less than 5MB!");
+    throw new ApiError(400, "Video size must be less than 50MB!");
   }
 
   // Upload on Cloudinary (works with both path and buffer)
@@ -275,10 +275,14 @@ const updateVideo = asyncHandler(async (req, res) => {
 
   // Check for Size
   const videoSize = videoFileObj.size;
-  const maxSize = 5 * 1024 * 1024;
-  if (videoSize > maxSize) {
-    throw new ApiError(400, "Video Size must be less than 5MB!");
-  }
+-  const maxSize = 5 * 1024 * 1024;
++  const maxSize = 50 * 1024 * 1024; // 50MB
+-  if (videoSize > maxSize) {
+-    throw new ApiError(400, "Video Size must be less than 5MB!");
+-  }
++  if (videoSize > maxSize) {
++    throw new ApiError(400, "Video Size must be less than 50MB!");
++  }
 
   // Upload on Cloudinary
   const videoFile = await uploadCloudinary(videoFileObj.path || videoFileObj);
