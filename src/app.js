@@ -8,6 +8,7 @@ import likeRouter from "./rotues/like.route.js";
 import subsRouter from "./rotues/subs.route.js";
 import playlistRouter from "./rotues/playlist.route.js";
 import dashboardRouter from "./rotues/dashboard.route.js";
+import cloudinaryRouter from "./rotues/cloudinary.route.js";
 
 const app = express();
 
@@ -59,6 +60,9 @@ app.use("/api/v1/playlists", playlistRouter);
 
 // Dashboard Router
 app.use("/api/v1/dashboards", dashboardRouter);
+
+// Cloudinary Router
+app.use("/api/v1/cloudinary", cloudinaryRouter);
 
 //404 Handler (must be after all routes)
 app.use((req, res) => {
