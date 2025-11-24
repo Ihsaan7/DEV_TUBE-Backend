@@ -261,14 +261,10 @@ const updateVideo = asyncHandler(async (req, res) => {
 
   // Check for Size
   const videoSize = videoFileObj.size;
--  const maxSize = 5 * 1024 * 1024;
-+  const maxSize = 50 * 1024 * 1024; // 50MB
--  if (videoSize > maxSize) {
--    throw new ApiError(400, "Video Size must be less than 5MB!");
--  }
-+  if (videoSize > maxSize) {
-+    throw new ApiError(400, "Video Size must be less than 50MB!");
-+  }
+  const maxSize = 50 * 1024 * 1024; // 50MB
+  if (videoSize > maxSize) {
+    throw new ApiError(400, "Video Size must be less than 50MB!");
+  }
 
   // Upload on Cloudinary
   const videoFile = await uploadCloudinary(videoFileObj.path || videoFileObj);
