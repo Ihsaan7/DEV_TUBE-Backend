@@ -62,7 +62,7 @@ const getVideo = asyncHandler(async (req, res) => {
         pipeline: [
           {
             $lookup: {
-              from: "subscriptions",
+              from: "subs",
               localField: "_id",
               foreignField: "channel",
               as: "subscribers",

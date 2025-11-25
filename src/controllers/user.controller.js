@@ -301,13 +301,12 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error uploading CoverImage to Cloudinary!");
   }
 
-  // Delete previous CoverImage
-  const oldCoverImage = req.user?.avatar;
-  if (!oldCoverImage) {
-    throw new ApiError(400, "Cannot get the Old Cover Image!");
+  // Delete previous CoverImage (if exists)
+  const oldCoverImage = req.user?.coverImage;
+  if (oldCoverImage) {
+    const publicId = oldCoverImage.split("/").pop().split(".")[0];
+    await deleteFromCloudinary(publicId);
   }
-  const publicId = oldCoverImage.split("/").pop().split(".")[0];
-  await deleteFromCloudinary(publicId);
 
   // Update user's Cover image
   const user = await User.findByIdAndUpdate(
@@ -341,7 +340,7 @@ const getChannel = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: "subscriptions",
+        from: "subs",
         localField: "_id",
         foreignField: "channel",
         as: "subscribers",
@@ -349,7 +348,7 @@ const getChannel = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: "subscriptions",
+        from: "subs",
         localField: "_id",
         foreignField: "subscriber",
         as: "subscribedTo",
