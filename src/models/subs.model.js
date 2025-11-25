@@ -12,7 +12,10 @@ const subscriptionSchema = new mongoose.Schema(
       ref: "User",
     },
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    collection: "subs" // Explicitly set collection name
+  }
 );
 
 subscriptionSchema.plugin(mongooseAggregatePagination);
